@@ -85,7 +85,8 @@ wisc_plot <- county_all %>%
     barwidth = 16,
     barheight = 0.5
   )) +
-  labs(title = 'Disparity in Arrest Rates\nBetween Whites and\nMinorites in Wisconsin')
+  labs(title = 'Disparity in Arrest Rates\nBetween Whites and\nMinorites in Wisconsin',
+       caption = 'Data: Stanford Open Policing Project')
 wisc_plot
 
 png("~/Desktop/tidytuesday/open-policing/wisconsin.png",
