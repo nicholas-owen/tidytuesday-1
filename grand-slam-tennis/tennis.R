@@ -1,9 +1,9 @@
-library(tidyverse); library(gganimate); library(lubridate)
-
-player_dob <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-04-09/player_dob.csv")
+library(tidyverse); library(gganimate)
 
 grand_slams <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-04-09/grand_slams.csv")
 
+
+#create variable for tournament order, shorten goolagong's name for labeling ease
 grand_slams_clean <- grand_slams %>% 
   mutate(tournament_order = case_when(grand_slam=='australian_open' ~ 1,
                                       grand_slam=='french_open' ~ 2,
@@ -11,6 +11,7 @@ grand_slams_clean <- grand_slams %>%
                                       grand_slam=='us_open' ~ 4),
          name = ifelse(name == 'Evonne Goolagong Cawley', 'Evonne Goolagong', name)) %>% 
   arrange(tournament_date)
+
 
 init_df <- grand_slams_clean %>% 
   filter(year <= 1975) %>%
@@ -25,7 +26,6 @@ init_df <- grand_slams_clean %>%
 
 for (i in 1976:2019) {
   for (j in 1:4) {
-    
     tmp_df <- grand_slams_clean %>% 
       filter(year < i | (year==i & tournament_order <= j)) %>% 
       group_by(name) %>% 
@@ -41,22 +41,19 @@ for (i in 1976:2019) {
     
     init_df <- init_df %>%
       bind_rows(tmp_df)
-      
   }
 }
 
-init_df_copy <- init_df %>% 
+#add group ids to use as transition states in gganimate
+final_df <- init_df %>% 
   group_by(curr_year, tournament_num) %>% 
   mutate(num = group_indices()) %>% 
   ungroup()
 
 
-#animation works, need to make it look pretty
+#set font, theme
 my_font <- 'Quicksand'
 my_background <- 'antiquewhite'
-
-
-
 my_theme <- my_theme <- theme(text = element_text(family = my_font),
                               rect = element_rect(fill = my_background),
                               plot.background = element_rect(fill = my_background, color = NA),
@@ -75,9 +72,8 @@ my_theme <- my_theme <- theme(text = element_text(family = my_font),
 
 theme_set(theme_light() + my_theme)
 
-
-barplot_race <- ggplot(aes(ordering, group = name), data = init_df_copy) +
-  
+#make plot
+barplot_race <- ggplot(aes(ordering, group = name), data = final_df) +
   geom_tile(aes(y = rolling_win_count / 2, 
                 height = rolling_win_count,
                 width = 0.9, fill=gender), alpha = 0.9) +
